@@ -76,8 +76,8 @@ class CrawlerEngine:
             "/academic-programs", "/academics", "/programs", "/courses",
             "/ug_pg_phd_program", "/btech", "/shms", "/soet",
             "/admission-process", "/admission-procedure", "/admissions",
-            "/fee-structure", "/scholarships", "/placement",
-            "/faculty-staff", "/faculty_directory"
+            "/fee-structure", "/scholarships", "/placement", "/placement-cell", "/career",
+            "/faculty-staff", "/faculty_directory", "/dos", "/departments", "/schools"
         ]
         for sub in candidate_subpaths:
             cand_url = f"{parsed_seed.scheme}://{parsed_seed.netloc}{sub}"

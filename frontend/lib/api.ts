@@ -38,7 +38,18 @@ export interface TraceableFact {
   last_verified_at?: string;
 }
 
+export interface Department {
+  id: string;
+  name: string;
+  code?: string;
+  head_of_department?: string;
+  description?: string;
+  website_url?: string;
+  source_url?: string;
+}
+
 export interface UniversityProfile extends UniversitySummary {
+  departments?: Department[];
   admissions: any[];
   programs: any[];
   scholarships: any[];
@@ -69,6 +80,7 @@ export interface ExtractedSummary {
   data_completeness_score: number;
   admissions_count: number;
   programs_count: number;
+  departments_count?: number;
   scholarships_count: number;
   faculty_count: number;
   placements_count: number;

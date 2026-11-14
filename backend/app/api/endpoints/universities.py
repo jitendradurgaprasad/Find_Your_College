@@ -8,13 +8,14 @@ from datetime import datetime
 from app.database.session import get_db
 from app.models.models import (
     University, Admission, Program, Scholarship, Faculty, Placement,
-    Facility, Notification, UniversityContact, ExtractedRecord, ResearchProject
+    Facility, Notification, UniversityContact, ExtractedRecord, ResearchProject, Department
 )
 from app.schemas.schemas import (
     UniversitySummary, UniversityProfile, AdmissionSchema, ProgramSchema,
     ScholarshipSchema, FacultySchema, PlacementSchema, NotificationSchema,
     FacilitySchema, ContactSchema, TraceableFact, SearchRequest, SearchResponse,
-    CollegeSuggestion, URLResolveResponse, AISearchRequest, AISearchResponse, RecommendedInstitution
+    CollegeSuggestion, URLResolveResponse, AISearchRequest, AISearchResponse, RecommendedInstitution,
+    DepartmentSchema
 )
 from crawler.discovery import DiscoveryEngine
 from extraction.ai_extractor import AIExtractor
@@ -96,6 +97,7 @@ def list_universities(
         sch_count = db.query(Scholarship).filter(Scholarship.university_id == u.id).count()
         prog_count = db.query(Program).filter(Program.university_id == u.id).count()
         fac_count = db.query(Faculty).filter(Faculty.university_id == u.id).count()
+        dept_count = db.query(Department).filter(Department.university_id == u.id).count()
 
         results.append(UniversitySummary(
             id=u.id,
@@ -120,6 +122,7 @@ def list_universities(
             has_scholarships=sch_count > 0,
             programs_count=prog_count,
             faculty_count=fac_count,
+            departments_count=dept_count,
             created_at=u.created_at
         ))
 
@@ -404,6 +407,7 @@ def get_university_profile(univ_id: str, db: Session = Depends(get_db)):
     programs = db.query(Program).filter(Program.university_id == u.id).all()
     scholarships = db.query(Scholarship).filter(Scholarship.university_id == u.id).all()
     faculty = db.query(Faculty).filter(Faculty.university_id == u.id).all()
+    departments = db.query(Department).filter(Department.university_id == u.id).all()
     placements = db.query(Placement).filter(Placement.university_id == u.id).all()
     facilities = db.query(Facility).filter(Facility.university_id == u.id).all()
     research = db.query(ResearchProject).filter(ResearchProject.university_id == u.id).all()
@@ -443,6 +447,15 @@ def get_university_profile(univ_id: str, db: Session = Depends(get_db)):
             seen_prog_keys.add(prog_key)
             unique_programs.append(p)
 
+    # Deduplicate departments
+    seen_dept_keys = set()
+    unique_departments = []
+    for d in departments:
+        dept_key = re.sub(r"[^a-zA-Z0-9]", "", d.name.lower())
+        if dept_key not in seen_dept_keys:
+            seen_dept_keys.add(dept_key)
+            unique_departments.append(d)
+
     latest_adm = unique_admissions[0] if unique_admissions else None
     adm_status = latest_adm.admission_status if latest_adm else "UNKNOWN"
 
@@ -469,7 +482,9 @@ def get_university_profile(univ_id: str, db: Session = Depends(get_db)):
         has_scholarships=len(scholarships) > 0,
         programs_count=len(unique_programs),
         faculty_count=len(faculty),
+        departments_count=len(unique_departments),
         created_at=u.created_at,
+        departments=[DepartmentSchema.from_orm(d) for d in unique_departments],
         admissions=[AdmissionSchema.from_orm(a) for a in unique_admissions],
         programs=[ProgramSchema.from_orm(p) for p in unique_programs],
         scholarships=[ScholarshipSchema.from_orm(s) for s in scholarships],
@@ -481,6 +496,10 @@ def get_university_profile(univ_id: str, db: Session = Depends(get_db)):
         contacts=[ContactSchema.from_orm(c) for c in contacts],
         traceable_facts=traceable_facts
     )
+
+@router.get("/{univ_id}/departments", response_model=List[DepartmentSchema])
+def get_university_departments(univ_id: str, db: Session = Depends(get_db)):
+    return db.query(Department).filter(Department.university_id == univ_id).all()
 
 @router.get("/{univ_id}/admissions", response_model=List[AdmissionSchema])
 def get_university_admissions(univ_id: str, db: Session = Depends(get_db)):

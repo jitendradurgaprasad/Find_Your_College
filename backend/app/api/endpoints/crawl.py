@@ -5,7 +5,7 @@ from typing import List
 
 from app.database.session import get_db
 from app.models.models import (
-    CrawlJob, CrawlLog, University, Admission, Program, Scholarship, Faculty, Placement, ExtractedRecord
+    CrawlJob, CrawlLog, University, Admission, Program, Scholarship, Faculty, Placement, ExtractedRecord, Department
 )
 from app.schemas.schemas import CrawlStartRequest, CrawlJobStatus, CrawlLogSchema
 from crawler.url_extractor import URLExtractor
@@ -77,6 +77,7 @@ def get_crawl_status(job_id: str, db: Session = Depends(get_db)):
             "data_completeness_score": float(univ.data_completeness_score or 0),
             "admissions_count": db.query(Admission).filter(Admission.university_id == univ.id).count(),
             "programs_count": db.query(Program).filter(Program.university_id == univ.id).count(),
+            "departments_count": db.query(Department).filter(Department.university_id == univ.id).count(),
             "scholarships_count": db.query(Scholarship).filter(Scholarship.university_id == univ.id).count(),
             "faculty_count": db.query(Faculty).filter(Faculty.university_id == univ.id).count(),
             "placements_count": db.query(Placement).filter(Placement.university_id == univ.id).count(),

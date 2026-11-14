@@ -31,6 +31,7 @@ class UniversitySummary(UniversityBase):
     has_scholarships: bool = False
     programs_count: int = 0
     faculty_count: int = 0
+    departments_count: int = 0
     created_at: datetime
     model_config = {"from_attributes": True}
 
@@ -131,6 +132,10 @@ class PlacementSchema(BaseModel):
     currency: Optional[str] = "INR"
     total_offers: Optional[int] = None
     recruiting_companies: List[str] = []
+    placement_office_contact: Optional[str] = None
+    placement_officer: Optional[str] = None
+    placement_office_email: Optional[str] = None
+    placement_office_phone: Optional[str] = None
     report_url: Optional[str] = None
     source_url: str
     verification_status: str
@@ -184,8 +189,20 @@ class ContactSchema(BaseModel):
     source_url: Optional[str] = None
     model_config = {"from_attributes": True}
 
+# Department / School Schema
+class DepartmentSchema(BaseModel):
+    id: str
+    name: str
+    code: Optional[str] = None
+    head_of_department: Optional[str] = None
+    description: Optional[str] = None
+    website_url: Optional[str] = None
+    source_url: Optional[str] = None
+    model_config = {"from_attributes": True}
+
 # Detailed University Profile
 class UniversityProfile(UniversitySummary):
+    departments: List[DepartmentSchema] = []
     admissions: List[AdmissionSchema] = []
     programs: List[ProgramSchema] = []
     scholarships: List[ScholarshipSchema] = []

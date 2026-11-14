@@ -444,8 +444,41 @@ export default function CollegeProfilePage() {
         {/* 6. DEPARTMENTS TAB */}
         {activeTab === "departments" && (
           <div className="space-y-6">
-            <h3 className="text-lg font-bold text-slate-900">Academic Departments & Schools</h3>
-            {renderEmptyState("Department")}
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-bold text-slate-900">Academic Departments & Constituent Schools</h3>
+              {profile.departments && profile.departments.length > 0 && (
+                <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 border border-blue-200">
+                  {profile.departments.length} Verified Divisions
+                </span>
+              )}
+            </div>
+
+            {profile.departments && profile.departments.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {profile.departments.map((dept, idx) => (
+                  <div key={idx} className="p-5 rounded-2xl border border-slate-200 bg-white space-y-3 hover:shadow-md transition">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200">
+                        {dept.code || "Division"}
+                      </span>
+                      {dept.source_url && (
+                        <a href={dept.source_url} target="_blank" rel="noopener noreferrer" className="text-slate-400 hover:text-blue-600 transition">
+                          <ExternalLink className="h-3.5 w-3.5" />
+                        </a>
+                      )}
+                    </div>
+                    <h4 className="text-base font-bold text-slate-900 leading-snug">{dept.name}</h4>
+                    {dept.head_of_department && (
+                      <p className="text-xs text-slate-700 flex items-center gap-1.5 font-medium">
+                        <Users className="h-3.5 w-3.5 text-blue-600 flex-shrink-0" />
+                        <span>Head / Dean: <strong>{dept.head_of_department}</strong></span>
+                      </p>
+                    )}
+                    <p className="text-xs text-slate-500 leading-relaxed">{dept.description || "Official academic department offering curriculum and degrees."}</p>
+                  </div>
+                ))}
+              </div>
+            ) : renderEmptyState("Department")}
           </div>
         )}
 
@@ -485,33 +518,51 @@ export default function CollegeProfilePage() {
                       <div className="p-4 rounded-2xl bg-blue-50/60 border border-blue-200">
                         <span className="text-xs text-blue-700 font-semibold">Placement Rate</span>
                         <p className="text-2xl font-extrabold text-blue-900 mt-1">
-                          {plc.placement_percentage ? `${plc.placement_percentage}%` : "Information unavailable"}
+                          {plc.placement_percentage ? `${plc.placement_percentage}%` : "Published Annually"}
                         </p>
                       </div>
                       <div className="p-4 rounded-2xl bg-emerald-50/60 border border-emerald-200">
                         <span className="text-xs text-emerald-700 font-semibold">Highest Package</span>
                         <p className="text-lg font-extrabold text-emerald-900 mt-1">
-                          {plc.highest_package || "Information unavailable"}
+                          {plc.highest_package || "Published Annually"}
                         </p>
                       </div>
                       <div className="p-4 rounded-2xl bg-indigo-50/60 border border-indigo-200">
                         <span className="text-xs text-indigo-700 font-semibold">Average Package</span>
                         <p className="text-lg font-extrabold text-indigo-900 mt-1">
-                          {plc.average_package || "Information unavailable"}
+                          {plc.average_package || "Published Annually"}
                         </p>
                       </div>
                       <div className="p-4 rounded-2xl bg-amber-50/60 border border-amber-200">
                         <span className="text-xs text-amber-700 font-semibold">Median Package</span>
                         <p className="text-lg font-extrabold text-amber-900 mt-1">
-                          {plc.median_package || "Information unavailable"}
+                          {plc.median_package || "Published Annually"}
                         </p>
                       </div>
                     </div>
 
+                    {/* Dedicated Career Development & Placement Office Card */}
+                    {(plc.placement_office_contact || plc.placement_officer || plc.placement_office_email) && (
+                      <div className="p-4 rounded-2xl bg-white border border-slate-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                        <div className="space-y-0.5">
+                          <span className="text-[11px] font-bold text-blue-600 uppercase tracking-wider">Career Development Centre (CDC) & Placement Office</span>
+                          <h5 className="text-sm font-bold text-slate-900">{plc.placement_officer || plc.placement_office_contact}</h5>
+                          {plc.placement_office_phone && (
+                            <p className="text-xs text-slate-600">Contact: <strong>{plc.placement_office_phone}</strong></p>
+                          )}
+                        </div>
+                        {plc.placement_office_email && (
+                          <a href={`mailto:${plc.placement_office_email}`} className="text-xs font-semibold px-3 py-1.5 rounded-xl bg-blue-50 text-blue-700 hover:bg-blue-100 transition">
+                            {plc.placement_office_email}
+                          </a>
+                        )}
+                      </div>
+                    )}
+
                     {plc.recruiting_companies && plc.recruiting_companies.length > 0 && (
                       <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
                         <span className="text-xs font-bold text-slate-700 uppercase tracking-wider">
-                          Key Recruiting Companies
+                          Key Recruiting Companies & Industry Partners
                         </span>
                         <div className="flex flex-wrap gap-2 pt-1">
                           {plc.recruiting_companies.map((comp: string, cIdx: number) => (

@@ -9,13 +9,14 @@ from app.database.session import SessionLocal
 from app.models.models import (
     University, CrawlJob, CrawlLog, CrawledPage, ExtractedRecord,
     Admission, Program, Scholarship, Faculty, Placement, Facility,
-    Notification, UniversityContact
+    Notification, UniversityContact, Department
 )
 from crawler.url_extractor import URLExtractor
 from crawler.crawler_engine import CrawlerEngine
 from extraction.classifier import ContentClassifier
 from extraction.admission_extractor import AdmissionExtractor
 from extraction.course_extractor import CourseExtractor
+from extraction.department_extractor import DepartmentExtractor
 from extraction.scholarship_extractor import ScholarshipExtractor
 from extraction.faculty_extractor import FacultyExtractor
 from extraction.placement_extractor import PlacementExtractor
@@ -145,6 +146,7 @@ class BackgroundJobManager:
 
             all_admissions = []
             all_courses = []
+            all_departments = []
             all_scholarships = []
             all_faculty = []
             all_placements = []
@@ -172,23 +174,26 @@ class BackgroundJobManager:
                 )
                 db.add(page_rec)
 
-                # Extract according to categories
+                # Extract according to categories & cross-domain discovery
                 if "ADMISSIONS" in categories or "GENERAL" in categories:
                     all_admissions.extend(AdmissionExtractor.extract_admissions(p))
 
                 if "COURSES" in categories or "GENERAL" in categories:
                     all_courses.extend(CourseExtractor.extract_courses(p))
 
+                # Always extract departments and academic schools across all institutional pages
+                all_departments.extend(DepartmentExtractor.extract_departments(p))
+
+                # Extract faculty across all school, course, and directory pages
+                all_faculty.extend(FacultyExtractor.extract_faculty(p))
+
+                # Extract placement data across placement, career, and institutional pages
+                all_placements.extend(PlacementExtractor.extract_placements(p))
+
                 if "SCHOLARSHIPS" in categories:
                     all_scholarships.extend(ScholarshipExtractor.extract_scholarships(p))
 
-                if "FACULTY" in categories:
-                    all_faculty.extend(FacultyExtractor.extract_faculty(p))
-
-                if "PLACEMENTS" in categories:
-                    all_placements.extend(PlacementExtractor.extract_placements(p))
-
-                if "FACILITIES" in categories:
+                if "FACILITIES" in categories or "CAMPUS" in categories:
                     all_facilities.extend(FacilitiesExtractor.extract_facilities(p))
 
                 if "NOTIFICATIONS" in categories:
@@ -202,6 +207,22 @@ class BackgroundJobManager:
             all_admissions = Deduplicator.deduplicate_admissions(all_admissions)
             all_faculty = Deduplicator.deduplicate_faculty(all_faculty)
             all_scholarships = Deduplicator.deduplicate_scholarships(all_scholarships)
+
+            # Deduplicate departments
+            unique_depts = {}
+            for d in all_departments:
+                d_norm = re.sub(r"[^a-zA-Z0-9]", "", d["name"].lower())
+                if d_norm not in unique_depts:
+                    unique_depts[d_norm] = d
+            all_departments = list(unique_depts.values())
+
+            # Deduplicate placements by academic year
+            unique_plcs = {}
+            for pl in all_placements:
+                yr = pl.get("academic_year", "2025-2026")
+                if yr not in unique_plcs or pl.get("placement_percentage"):
+                    unique_plcs[yr] = pl
+            all_placements = list(unique_plcs.values())
 
             # AI Booster: if few courses discovered, enrich via Gemini AI
             if len(all_courses) < 6:
@@ -283,6 +304,25 @@ class BackgroundJobManager:
                 db.add(prog_entity)
                 total_records_extracted += 1
 
+            # Persist Departments
+            db.query(Department).filter(Department.university_id == univ.id).delete()
+            db.commit()
+
+            dept_id_map = {}
+            for d in all_departments:
+                dept_entity = Department(
+                    id=str(uuid.uuid4()),
+                    university_id=univ.id,
+                    name=d["name"],
+                    code=d.get("code"),
+                    head_of_department=d.get("head_of_department"),
+                    description=d.get("description"),
+                    source_url=d.get("source_url", seed_url)
+                )
+                db.add(dept_entity)
+                dept_id_map[d["name"].lower()] = dept_entity.id
+                total_records_extracted += 1
+
             # Persist Scholarships
             for s in all_scholarships:
                 sch_entity = Scholarship(
@@ -302,13 +342,25 @@ class BackgroundJobManager:
                 total_records_extracted += 1
 
             # Persist Faculty
+            db.query(Faculty).filter(Faculty.university_id == univ.id).delete()
+            db.commit()
+
             for f in all_faculty:
+                matched_dept_id = None
+                spec = f.get("specialization") or ""
+                for d_name, d_id in dept_id_map.items():
+                    if d_name in spec.lower() or spec.lower() in d_name:
+                        matched_dept_id = d_id
+                        break
+
                 fac_entity = Faculty(
                     id=str(uuid.uuid4()),
                     university_id=univ.id,
+                    department_id=matched_dept_id,
                     name=f["name"],
                     designation=f.get("designation"),
                     qualifications=f.get("qualifications"),
+                    specialization=f.get("specialization"),
                     official_email=f.get("official_email"),
                     source_url=f.get("source_url", seed_url),
                     verification_status=f.get("verification_status", "VERIFIED")
@@ -317,6 +369,9 @@ class BackgroundJobManager:
                 total_records_extracted += 1
 
             # Persist Placements
+            db.query(Placement).filter(Placement.university_id == univ.id).delete()
+            db.commit()
+
             for p in all_placements:
                 plc_entity = Placement(
                     id=str(uuid.uuid4()),
@@ -327,9 +382,13 @@ class BackgroundJobManager:
                     average_package=p.get("average_package"),
                     median_package=p.get("median_package"),
                     currency=p.get("currency", "INR"),
+                    total_offers=p.get("total_offers"),
                     recruiting_companies=p.get("recruiting_companies", []),
+                    placement_office_contact=p.get("placement_office_contact") or p.get("placement_officer"),
+                    report_url=p.get("report_url"),
                     source_url=p.get("source_url", seed_url),
-                    verification_status=p.get("verification_status", "VERIFIED")
+                    verification_status=p.get("verification_status", "VERIFIED"),
+                    confidence_score=p.get("confidence_score", 0.90)
                 )
                 db.add(plc_entity)
                 total_records_extracted += 1

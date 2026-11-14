@@ -443,13 +443,21 @@ function ScannerContent() {
                   </div>
 
                   {/* Summary Category Pills */}
-                  <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 text-center">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 text-center">
                     <div className="p-3 bg-slate-50 rounded-xl border border-slate-100">
                       <div className="text-lg font-bold text-slate-900">
                         {jobStatus.extracted_summary.programs_count}
                       </div>
                       <div className="text-[11px] font-medium text-slate-500 uppercase tracking-wider">
-                        Programs / Degrees
+                        Programs
+                      </div>
+                    </div>
+                    <div className="p-3 bg-slate-50 rounded-xl border border-slate-100">
+                      <div className="text-lg font-bold text-slate-900">
+                        {jobStatus.extracted_summary.departments_count ?? 0}
+                      </div>
+                      <div className="text-[11px] font-medium text-slate-500 uppercase tracking-wider">
+                        Departments
                       </div>
                     </div>
                     <div className="p-3 bg-slate-50 rounded-xl border border-slate-100">
@@ -481,7 +489,7 @@ function ScannerContent() {
                         {jobStatus.extracted_summary.faculty_count}
                       </div>
                       <div className="text-[11px] font-medium text-slate-500 uppercase tracking-wider">
-                        Faculty Members
+                        Faculty
                       </div>
                     </div>
                   </div>
