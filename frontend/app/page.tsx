@@ -134,7 +134,7 @@ export default function HomePage() {
           {/* Trust Pill */}
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-100/70 border border-blue-200 text-blue-800 text-xs font-semibold shadow-sm">
             <ShieldCheck className="h-4 w-4 text-blue-600" />
-            <span>Autonomous Web Scraping & Fact Extraction Engine</span>
+            <span>Official College Discovery & Intelligence Platform</span>
           </div>
 
           {/* Master Hero Heading & Description */}
@@ -499,9 +499,9 @@ export default function HomePage() {
               <div className="h-8 w-8 rounded-lg bg-blue-500/20 text-blue-400 flex items-center justify-center font-bold text-sm">
                 1
               </div>
-              <h3 className="text-sm font-bold text-white">Direct URL Crawling</h3>
+              <h3 className="text-sm font-bold text-white">Official Campus Exploration</h3>
               <p className="text-xs text-slate-400 leading-relaxed">
-                Respectful robots.txt parsing, recursive HTML discovery, and prospectus PDF ingestion with SSRF security.
+                Direct exploration of official college websites, course brochures, admission notices, and syllabus catalogs.
               </p>
             </div>
 
@@ -509,9 +509,9 @@ export default function HomePage() {
               <div className="h-8 w-8 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-sm">
                 2
               </div>
-              <h3 className="text-sm font-bold text-white">Structured Extraction</h3>
+              <h3 className="text-sm font-bold text-white">Comprehensive College Intelligence</h3>
               <p className="text-xs text-slate-400 leading-relaxed">
-                Categorization into 11 relational domains: admissions, courses, fees, placements, scholarships, and faculties.
+                Organized into clear student categories: degree courses, official fees, entrance requirements, faculty directories, and career placements.
               </p>
             </div>
 
@@ -519,9 +519,9 @@ export default function HomePage() {
               <div className="h-8 w-8 rounded-lg bg-indigo-500/20 text-indigo-400 flex items-center justify-center font-bold text-sm">
                 3
               </div>
-              <h3 className="text-sm font-bold text-white">Verifiable Traceability</h3>
+              <h3 className="text-sm font-bold text-white">Direct Source Proof For Every Fact</h3>
               <p className="text-xs text-slate-400 leading-relaxed">
-                Every extracted statement is preserved with verbatim source evidence and date of last verification.
+                Every detail provides its exact official university link so students can verify truth directly at the source.
               </p>
             </div>
           </div>

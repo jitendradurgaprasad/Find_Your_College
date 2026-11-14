@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { 
   Compass, 
   Search, 
-  Cpu, 
+  Sparkles, 
   Scale, 
   ShieldCheck, 
   Activity, 
@@ -19,10 +19,10 @@ export default function Navbar() {
 
   const navLinks = [
     { name: "Search Colleges", href: "/search", icon: Search },
-    { name: "Live Scanner", href: "/scanner", icon: Cpu },
+    { name: "College Scanner", href: "/scanner", icon: Sparkles },
     { name: "Compare", href: "/compare", icon: Scale },
-    { name: "Data Quality", href: "/quality", icon: ShieldCheck },
-    { name: "Monitoring", href: "/monitoring", icon: Activity },
+    { name: "Verification", href: "/quality", icon: ShieldCheck },
+    { name: "Live Updates", href: "/monitoring", icon: Activity },
     { name: "Saved", href: "/saved", icon: Bookmark },
     { name: "Admin", href: "/admin", icon: Settings },
   ];
@@ -73,8 +73,8 @@ export default function Navbar() {
             href="/scanner"
             className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-medium shadow-sm hover:bg-blue-700 active:scale-95 transition"
           >
-            <Cpu className="h-4 w-4" />
-            <span className="hidden sm:inline">Scan Institution</span>
+            <Sparkles className="h-4 w-4" />
+            <span className="hidden sm:inline">Explore College</span>
           </Link>
         </div>
       </div>

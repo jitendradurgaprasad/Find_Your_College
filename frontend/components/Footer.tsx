@@ -47,14 +47,14 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Architecture & Compliance */}
+          {/* Integrity & Standards */}
           <div>
-            <h4 className="text-xs font-semibold text-slate-900 tracking-wider uppercase mb-3">Integrity & Standards</h4>
+            <h4 className="text-xs font-semibold text-slate-900 tracking-wider uppercase mb-3">Integrity & Authenticity</h4>
             <p className="text-xs text-slate-500 leading-relaxed mb-3">
-              Strictly adheres to <code className="text-blue-600">robots.txt</code>, SSRF prevention, request rate limiting, and authentic citation policies. No fabricated numbers or dates.
+              Strictly adheres to authentic citation policies, official university publications, and student transparency guidelines. Zero fabricated figures or promotional rankings.
             </p>
             <div className="text-[11px] text-slate-400">
-              Built with FastAPI, BeautifulSoup, Supabase PostgreSQL, and Next.js.
+              Verified by Find Your Collage Educational Intelligence Engine.
             </div>
           </div>
         </div>
